@@ -16,7 +16,9 @@ data class ExerciseDto(
     val name: String,
     val category: String,
     @SerializedName("muscleGroup") val muscleGroup: String,
-    val instruction: String
+    val instruction: String,
+    @SerializedName("animationFile") val animationFile: String? = null
+
 )
 
 data class SegmentDto(

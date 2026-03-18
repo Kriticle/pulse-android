@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import com.pulse.app.ui.screens.levelselect.LevelSelectScreen
 import com.pulse.app.ui.theme.PulseTheme
 
 class MainActivity : ComponentActivity() {
@@ -18,7 +17,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             PulseTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LevelSelectScreen(
+                    PulseNavGraph(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }

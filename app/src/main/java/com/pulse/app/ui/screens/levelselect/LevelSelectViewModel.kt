@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pulse.app.UserSession
 import com.pulse.app.data.BestAttemptDto
 import com.pulse.app.data.LevelDto
 import com.pulse.app.data.RetrofitClient
@@ -25,7 +26,7 @@ class LevelSelectViewModel : ViewModel() {
     var currentUser: UserDto? by mutableStateOf(null)
         private set
 
-    private val userId = "user-001"
+    private val userId = UserSession.userId
 
     init { loadData() }
 
@@ -40,6 +41,7 @@ class LevelSelectViewModel : ViewModel() {
                 levels = fetchedLevels
                 bestAttempts = fetchedAttempts.associateBy { it.levelId }
                 currentUser = fetchedUser
+                UserSession.currentUser = fetchedUser
             } catch (e: Exception) {
                 error = "Could not load levels. Is the server running?"
             } finally {
