@@ -12,6 +12,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun ResultsScreen(
@@ -99,25 +100,24 @@ fun ResultsScreen(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            var scoreVisible by remember { mutableStateOf(false) }
-                            LaunchedEffect(Unit) { scoreVisible = true }
-
-                            AnimatedVisibility(
-                                visible = scoreVisible,
-                                enter = scaleIn(
-                                    animationSpec = spring(
-                                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                                        stiffness = Spring.StiffnessLow
-                                    )
-                                ) + fadeIn()
-                            ) {
-                                Text(
-                                    text = "$score",
-                                    fontSize = 72.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = accentColor
-                                )
+                            var displayedScore by remember { mutableStateOf(0) }
+                            LaunchedEffect(score) {
+                                val duration = 1500L
+                                val steps = 60
+                                val stepDelay = duration / steps
+                                val increment = score.toFloat() / steps
+                                for (i in 1..steps) {
+                                    delay(stepDelay)
+                                    displayedScore = (increment * i).toInt().coerceAtMost(score)
+                                }
                             }
+
+                            Text(
+                                text = "$displayedScore",
+                                fontSize = 72.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = accentColor
+                            )
 
                         }
 

@@ -141,90 +141,116 @@ fun LevelSelectScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Box(modifier = Modifier.fillMaxSize()) {
-
-                        LazyRow(
-                            state = scrollState,
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(horizontal = 56.dp),
-                            horizontalArrangement = Arrangement.spacedBy(20.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            items(viewModel.filteredLevels) { level ->
-                                val isExpanded = viewModel.expandedLevelId == level.id
-                                LevelCard(
-                                    level = level,
-                                    isExpanded = isExpanded,
-                                    cardIndex = viewModel.filteredLevels.indexOf(level),
-                                    bestAttempt = viewModel.bestAttempts[level.id],
-                                    onClick = { viewModel.toggleExpanded(level.id) },
-                                    onStartClick = { onLevelClick(level) }
-                                )
-                            }
-                        }
-
-                        val showLeftArrow by remember {
-                            derivedStateOf {
-                                scrollState.firstVisibleItemIndex > 0 ||
-                                        scrollState.firstVisibleItemScrollOffset > 0
-                            }
-                        }
-
-                        if (showLeftArrow) {
-                            FilledIconButton(
-                                onClick = {
-                                    coroutineScope.launch {
-                                        val current = scrollState.firstVisibleItemIndex
-                                        scrollState.animateScrollToItem(
-                                            (current - 1).coerceAtLeast(0)
-                                        )
-                                    }
-                                },
-                                modifier = Modifier
-                                    .align(Alignment.CenterStart)
-                                    .padding(start = 8.dp),
-                                colors = IconButtonDefaults.filledIconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
-                                )
+                        if (viewModel.filteredLevels.isEmpty()) {
+                            Column(
+                                modifier = Modifier.align(Alignment.Center),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text(
-                                    text = "‹",
-                                    fontSize = 22.sp,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    fontWeight = FontWeight.Bold
+                                    text = "No levels here yet",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
-                            }
-                        }
-
-                        val showRightArrow by remember {
-                            derivedStateOf {
-                                val layoutInfo = scrollState.layoutInfo
-                                val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()
-                                lastVisible != null &&
-                                        lastVisible.index < layoutInfo.totalItemsCount - 1
-                            }
-                        }
-
-                        if (showRightArrow) {
-                            FilledIconButton(
-                                onClick = {
-                                    coroutineScope.launch {
-                                        val current = scrollState.firstVisibleItemIndex
-                                        scrollState.animateScrollToItem(current + 1)
-                                    }
-                                },
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .padding(end = 8.dp),
-                                colors = IconButtonDefaults.filledIconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
-                                )
-                            ) {
                                 Text(
-                                    text = "›",
-                                    fontSize = 22.sp,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    fontWeight = FontWeight.Bold
+                                    text = "Try a different category",
+                                    fontSize = 13.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                                 )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                TextButton(onClick = { viewModel.selectCategory("all") }) {
+                                    Text(
+                                        text = "Show all levels",
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+                        } else {
+                            LazyRow(
+                                state = scrollState,
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(horizontal = 56.dp),
+                                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                items(viewModel.filteredLevels) { level ->
+                                    val isExpanded = viewModel.expandedLevelId == level.id
+                                    LevelCard(
+                                        level = level,
+                                        isExpanded = isExpanded,
+                                        cardIndex = viewModel.filteredLevels.indexOf(level),
+                                        bestAttempt = viewModel.bestAttempts[level.id],
+                                        onClick = { viewModel.toggleExpanded(level.id) },
+                                        onStartClick = { onLevelClick(level) }
+                                    )
+                                }
+                            }
+
+                            val showLeftArrow by remember {
+                                derivedStateOf {
+                                    scrollState.firstVisibleItemIndex > 0 ||
+                                            scrollState.firstVisibleItemScrollOffset > 0
+                                }
+                            }
+
+                            if (showLeftArrow) {
+                                FilledIconButton(
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            val current = scrollState.firstVisibleItemIndex
+                                            scrollState.animateScrollToItem(
+                                                (current - 1).coerceAtLeast(0)
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .align(Alignment.CenterStart)
+                                        .padding(start = 8.dp),
+                                    colors = IconButtonDefaults.filledIconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+                                    )
+                                ) {
+                                    Text(
+                                        text = "‹",
+                                        fontSize = 22.sp,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+
+                            val showRightArrow by remember {
+                                derivedStateOf {
+                                    val layoutInfo = scrollState.layoutInfo
+                                    val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()
+                                    lastVisible != null &&
+                                            lastVisible.index < layoutInfo.totalItemsCount - 1
+                                }
+                            }
+
+                            if (showRightArrow) {
+                                FilledIconButton(
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            val current = scrollState.firstVisibleItemIndex
+                                            scrollState.animateScrollToItem(current + 1)
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .align(Alignment.CenterEnd)
+                                        .padding(end = 8.dp),
+                                    colors = IconButtonDefaults.filledIconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+                                    )
+                                ) {
+                                    Text(
+                                        text = "›",
+                                        fontSize = 22.sp,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
                     }

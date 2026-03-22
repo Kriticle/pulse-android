@@ -191,7 +191,8 @@ class PlayViewModel : ViewModel() {
                 segmentTimeRemaining--
                 totalElapsedSeconds++
                 if (segment.type == "active") {
-                    score += 10
+                    val difficulty = level?.difficulty ?: 1
+                    score += 10 * difficulty
                     combo++
                 }
                 if (segmentTimeRemaining == 5 && nextSegment != null) {
