@@ -86,6 +86,28 @@ fun LevelCard(
                             color = accentColor
                         )
                     }
+                    // Category chips
+                    if (level.categories.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            level.categories.take(2).forEach { category ->
+                                Surface(
+                                    color = accentColor.copy(alpha = 0.15f),
+                                    shape = MaterialTheme.shapes.small
+                                ) {
+                                    Text(
+                                        text = category.replaceFirstChar { it.uppercase() },
+                                        fontSize = 9.sp,
+                                        color = accentColor,
+                                        modifier = Modifier.padding(
+                                            horizontal = 6.dp,
+                                            vertical = 2.dp
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
 

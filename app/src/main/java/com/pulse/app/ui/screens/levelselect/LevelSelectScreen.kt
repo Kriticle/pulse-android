@@ -16,6 +16,37 @@ import com.pulse.app.data.LevelDto
 import kotlinx.coroutines.launch
 
 @Composable
+fun CategoryTabs(
+    categories: List<String>,
+    selectedCategory: String,
+    onCategorySelected: (String) -> Unit
+) {
+    val allCategories = listOf("all") + categories
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 32.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        items(allCategories) { category ->
+            val isSelected = category == selectedCategory
+            FilterChip(
+                selected = isSelected,
+                onClick = { onCategorySelected(category) },
+                label = {
+                    Text(
+                        text = category.replaceFirstChar { it.uppercase() },
+                        fontSize = 12.sp
+                    )
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                )
+            )
+        }
+    }
+}
+@Composable
 fun LevelSelectScreen(
     modifier: Modifier = Modifier,
     onLevelClick: (LevelDto) -> Unit = {},
@@ -93,6 +124,21 @@ fun LevelSelectScreen(
                             }
                         }
                     }
+                    // Category tabs
+                    val allCategories = remember(viewModel.levels) {
+                        viewModel.levels
+                            .flatMap { it.categories }
+                            .distinct()
+                            .sorted()
+                    }
+
+                    CategoryTabs(
+                        categories = allCategories,
+                        selectedCategory = viewModel.selectedCategory,
+                        onCategorySelected = { viewModel.selectCategory(it) }
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -103,12 +149,12 @@ fun LevelSelectScreen(
                             horizontalArrangement = Arrangement.spacedBy(20.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            items(viewModel.levels) { level ->
+                            items(viewModel.filteredLevels) { level ->
                                 val isExpanded = viewModel.expandedLevelId == level.id
                                 LevelCard(
                                     level = level,
                                     isExpanded = isExpanded,
-                                    cardIndex = viewModel.levels.indexOf(level),
+                                    cardIndex = viewModel.filteredLevels.indexOf(level),
                                     bestAttempt = viewModel.bestAttempts[level.id],
                                     onClick = { viewModel.toggleExpanded(level.id) },
                                     onStartClick = { onLevelClick(level) }

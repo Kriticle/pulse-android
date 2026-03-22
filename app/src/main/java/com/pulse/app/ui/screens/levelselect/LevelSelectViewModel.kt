@@ -26,6 +26,19 @@ class LevelSelectViewModel : ViewModel() {
     var currentUser: UserDto? by mutableStateOf(null)
         private set
 
+    var selectedCategory by mutableStateOf("all")
+        private set
+
+    val filteredLevels: List<LevelDto>
+        get() = if (selectedCategory == "all")
+            levels
+        else
+            levels.filter { it.categories.contains(selectedCategory) }
+
+    fun selectCategory(category: String) {
+        selectedCategory = category
+    }
+
     private val userId = UserSession.userId
 
     init { loadData() }
