@@ -10,6 +10,12 @@ import com.pulse.app.ui.screens.levelselect.LevelSelectScreen
 import com.pulse.app.ui.screens.prelevel.PreLevelScreen
 import com.pulse.app.ui.screens.play.PlayScreen
 import com.pulse.app.ui.screens.results.ResultsScreen
+import com.pulse.app.ui.screens.auth.LoginScreen
+import com.pulse.app.ui.screens.profile.ProfileScreen
+import com.pulse.app.SupabaseClient
+import io.github.jan.supabase.auth.auth
+import androidx.compose.runtime.remember
+
 sealed class Screen(val route: String) {
     object LevelSelect : Screen("level_select")
     object Profile : Screen("profile")
@@ -22,17 +28,45 @@ sealed class Screen(val route: String) {
     object Results : Screen("results/{levelId}/{score}") {
         fun createRoute(levelId: String, score: Int) = "results/$levelId/$score"
     }
+    object Login : Screen("login")
 }
+
 
 @Composable
 fun PulseNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
+    val authSession = remember {
+        try {
+            SupabaseClient.client.auth.currentSessionOrNull()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /*val startDestination = if (authSession != null)
+        Screen.LevelSelect.route
+    else
+        Screen.Login.route*/
+
+    val startDestination = Screen.LevelSelect.route
+
     NavHost(
         navController = navController,
-        startDestination = Screen.Results.route.replace("{levelId}", "level-001").replace("{score}", "350"),        modifier = modifier
+        startDestination = startDestination,
+        modifier = modifier
     ) {
+        composable(Screen.Login.route) {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate(Screen.LevelSelect.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(Screen.LevelSelect.route) {
             LevelSelectScreen(
                 onLevelClick = { level ->
@@ -45,7 +79,14 @@ fun PulseNavGraph(
         }
 
         composable(Screen.Profile.route) {
-            // placeholder until we build the profile screen
+            ProfileScreen(
+                onBack = { navController.popBackStack() },
+                onSignOut = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable(Screen.PreLevel.route) { backStackEntry ->
