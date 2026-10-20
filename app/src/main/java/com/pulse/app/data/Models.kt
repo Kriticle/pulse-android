@@ -52,10 +52,16 @@ data class UserDto(
 )
 
 data class CreateAttemptRequest(
+    @SerializedName("clientAttemptId") val clientAttemptId: String,
     @SerializedName("userId") val userId: String,
     @SerializedName("levelId") val levelId: String,
+    val score: Int,
     @SerializedName("durationSeconds") val durationSeconds: Int,
     @SerializedName("accuracyPct") val accuracyPct: Float = 0f
+)
+
+data class UpsertUserRequest(
+    @SerializedName("displayName") val displayName: String? = null
 )
 
 data class AttemptResponse(

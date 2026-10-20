@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.pulse.app.SupabaseClient
 import com.pulse.app.UserSession
 import com.pulse.app.data.RetrofitClient
+import com.pulse.app.data.UpsertUserRequest
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.IDToken
@@ -39,7 +40,12 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun signInWithGoogle(idToken: String, rawNonce: String) {
+    fun signInWithGoogle(
+        idToken: String,
+        rawNonce: String,
+        email: String,
+        displayName: String
+    ) {
         viewModelScope.launch {
             isLoading = true
             error = null
@@ -51,7 +57,7 @@ class AuthViewModel : ViewModel() {
                 }
                 val userId = SupabaseClient.client.auth.currentUserOrNull()?.id
                     ?: throw Exception("No user ID after sign in")
-                loadOrCreateUser(userId)
+                loadOrCreateUser(userId, email, displayName)
                 isLoggedIn = true
             } catch (e: Exception) {
                 error = "Sign in failed. Please try again."
@@ -70,13 +76,13 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    private suspend fun loadOrCreateUser(authId: String) {
-        try {
-            val user = RetrofitClient.api.getUser(authId)
-            UserSession.currentUser = user
-        } catch (e: Exception) {
-            // User doesn't exist yet — backend will create on first call
-        }
+    private suspend fun loadOrCreateUser(authId: String, email: String, displayName: String) {
+        val user = RetrofitClient.api.upsertUser(
+            UpsertUserRequest(
+                displayName = displayName.ifBlank { email.substringBefore("@") }
+            )
+        )
+        UserSession.currentUser = user
     }
 
     fun signOut() {
@@ -89,5 +95,9 @@ class AuthViewModel : ViewModel() {
                 error = "Sign out failed."
             }
         }
+    }
+
+    fun showSignInError(message: String) {
+        error = message
     }
 }

@@ -30,6 +30,8 @@ class ProfileViewModel : ViewModel() {
             error = null
             try {
                 val userId = UserSession.userId
+                    ?: SupabaseClient.client.auth.currentUserOrNull()?.id
+                    ?: throw IllegalStateException("No signed-in user")
                 user = RetrofitClient.api.getUser(userId)
                 UserSession.currentUser = user
             } catch (e: Exception) {

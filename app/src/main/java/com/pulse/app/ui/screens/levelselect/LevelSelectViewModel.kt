@@ -6,10 +6,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pulse.app.UserSession
+import com.pulse.app.SupabaseClient
 import com.pulse.app.data.BestAttemptDto
 import com.pulse.app.data.LevelDto
 import com.pulse.app.data.RetrofitClient
 import com.pulse.app.data.UserDto
+import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.launch
 
 class LevelSelectViewModel : ViewModel() {
@@ -39,8 +41,6 @@ class LevelSelectViewModel : ViewModel() {
         selectedCategory = category
     }
 
-    private val userId = UserSession.userId
-
     init { loadData() }
 
     fun loadData() {
@@ -48,6 +48,9 @@ class LevelSelectViewModel : ViewModel() {
             isLoading = true
             error = null
             try {
+                val userId = UserSession.userId
+                    ?: SupabaseClient.client.auth.currentUserOrNull()?.id
+                    ?: throw IllegalStateException("No signed-in user")
                 val fetchedLevels = RetrofitClient.api.getLevels()
                 val fetchedAttempts = RetrofitClient.api.getBestAttempts(userId)
                 val fetchedUser = RetrofitClient.api.getUser(userId)

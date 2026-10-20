@@ -13,21 +13,27 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
+import com.pulse.app.ui.ResultsSkeleton
 
 @Composable
 fun ResultsScreen(
     levelId: String,
     score: Int,
+    durationSeconds: Int,
+    accuracyPct: Float,
+    attemptId: String,
     onPlayAgain: () -> Unit,
     onLevelSelect: () -> Unit
 ) {
     val viewModel: ResultsViewModel = viewModel()
 
-    LaunchedEffect(levelId, score) {
+    LaunchedEffect(attemptId) {
         viewModel.submitAttempt(
+            clientAttemptId = attemptId,
             levelId = levelId,
             score = score,
-            durationSeconds = score / 10
+            durationSeconds = durationSeconds,
+            accuracyPct = accuracyPct
         )
     }
 
@@ -63,10 +69,7 @@ fun ResultsScreen(
         ) {
             when {
                 viewModel.isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = accentColor
-                    )
+                    ResultsSkeleton()
                 }
                 viewModel.error != null -> {
                     Column(
@@ -125,7 +128,20 @@ fun ResultsScreen(
                         Row(horizontalArrangement = Arrangement.spacedBy(48.dp)) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
-                                    text = formatDuration(score / 10),
+                                    text = if (accuracyPct > 0f) "${accuracyPct.toInt()}%" else "—",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "camera accuracy",
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = formatDuration(durationSeconds),
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface

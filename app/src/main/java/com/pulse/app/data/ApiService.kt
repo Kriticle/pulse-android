@@ -21,4 +21,7 @@ interface ApiService {
 
     @GET("users/{id}")
     suspend fun getUser(@Path("id") id: String): UserDto
+
+    @POST("users")
+    suspend fun upsertUser(@Body request: UpsertUserRequest): UserDto
 }

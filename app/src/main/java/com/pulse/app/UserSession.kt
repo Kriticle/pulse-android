@@ -7,5 +7,5 @@ import com.pulse.app.data.UserDto
 
 object UserSession {
     var currentUser: UserDto? by mutableStateOf(null)
-    val userId: String get() = currentUser?.id ?: "user-001"
+    val userId: String? get() = currentUser?.id
 }

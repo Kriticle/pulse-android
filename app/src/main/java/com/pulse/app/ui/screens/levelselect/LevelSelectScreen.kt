@@ -14,6 +14,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pulse.app.data.LevelDto
 import kotlinx.coroutines.launch
+import com.pulse.app.ui.LevelSelectSkeleton
+
 
 @Composable
 fun CategoryTabs(
@@ -57,10 +59,7 @@ fun LevelSelectScreen(
     Box(modifier = modifier.fillMaxSize()) {
         when {
             viewModel.isLoading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
-                    color = MaterialTheme.colorScheme.primary
-                )
+                LevelSelectSkeleton()
             }
             viewModel.error != null -> {
                 Column(

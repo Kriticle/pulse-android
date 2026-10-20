@@ -75,34 +75,36 @@ fun PreLevelScreen(
                             .weight(1f)
                             .fillMaxHeight()
                             .padding(40.dp),
-                        verticalArrangement = Arrangement.Center
+                        verticalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(
-                            text = "READY?",
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.primary,
-                            letterSpacing = 3.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = level.title,
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            DifficultyChip(level.difficulty)
+                        // Top — title + info
+                        Column {
                             Text(
-                                text = formatDuration(totalSeconds),
+                                text = "READY?",
                                 fontSize = 13.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.primary,
+                                letterSpacing = 3.sp
                             )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = level.title,
+                                fontSize = 32.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                DifficultyChip(level.difficulty)
+                                Text(
+                                    text = formatDuration(totalSeconds),
+                                    fontSize = 13.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
-                        Spacer(modifier = Modifier.height(40.dp))
 
-                        // Countdown
+                        // Middle — countdown
                         AnimatedContent(
                             targetState = viewModel.countdown,
                             transitionSpec = {
@@ -118,16 +120,21 @@ fun PreLevelScreen(
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(40.dp))
-
+                        // Bottom — cancel button
                         OutlinedButton(
                             onClick = {
                                 viewModel.cancelCountdown()
                                 onBack()
                             },
-                            modifier = Modifier.fillMaxWidth(0.6f)
+                            modifier = Modifier.fillMaxWidth(0.6f),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onSurface
+                            )
                         ) {
-                            Text("Cancel")
+                            Text(
+                                text = "Cancel",
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            )
                         }
                     }
 

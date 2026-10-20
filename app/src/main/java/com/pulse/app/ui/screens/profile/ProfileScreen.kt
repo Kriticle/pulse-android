@@ -10,6 +10,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.pulse.app.ui.ProfileSkeleton
 
 @Composable
 fun ProfileScreen(
@@ -22,10 +23,7 @@ fun ProfileScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         when {
             viewModel.isLoading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
-                    color = accentColor
-                )
+                ProfileSkeleton()
             }
             viewModel.error != null -> {
                 Column(

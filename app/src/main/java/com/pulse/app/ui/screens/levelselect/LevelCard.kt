@@ -80,7 +80,7 @@ fun LevelCard(
                     if (bestAttempt != null) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Best: ${bestAttempt.durationSeconds}s",
+                            text = "Best: ${bestAttempt.score} pts",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
                             color = accentColor

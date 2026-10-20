@@ -8,15 +8,26 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
+
+fun configValue(propertyName: String, envName: String, defaultValue: String = ""): String =
+    localProperties.getProperty(propertyName)
+        ?: providers.gradleProperty(propertyName).orNull
+        ?: providers.environmentVariable(envName).orNull
+        ?: defaultValue
+
 android {
     namespace = "com.pulse.app"
     compileSdk = 35
 
-    val localProperties = Properties()
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        localPropertiesFile.inputStream().use { localProperties.load(it) }
-    }
+    val supabaseUrl = configValue("supabase.url", "SUPABASE_URL")
+    val supabaseKey = configValue("supabase.key", "SUPABASE_KEY")
+    val googleWebClientId = configValue("google.web.client.id", "GOOGLE_WEB_CLIENT_ID")
+    val apiBaseUrl = configValue("api.base.url", "API_BASE_URL", "http://10.0.2.2:8080/")
 
     defaultConfig {
         applicationId = "com.pulse.app"
@@ -25,14 +36,21 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "SUPABASE_URL", "\"${localProperties.getProperty("supabase.url", "")}\"")
-        buildConfigField("String", "SUPABASE_KEY", "\"${localProperties.getProperty("supabase.key", "")}\"")
-        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProperties.getProperty("google.web.client.id", "")}\"")
+        buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
+        buildConfigField("String", "SUPABASE_KEY", "\"$supabaseKey\"")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$googleWebClientId\"")
+        buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
+        manifestPlaceholders["usesCleartextTraffic"] = "true"
     }
 
     buildTypes {
+        debug {
+            manifestPlaceholders["usesCleartextTraffic"] = "true"
+        }
+
         release {
             isMinifyEnabled = false
+            manifestPlaceholders["usesCleartextTraffic"] = "false"
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -79,12 +97,45 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-    implementation(libs.androidx.media3.exoplayer)
-    implementation(libs.androidx.media3.ui)
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
     implementation(libs.supabase.auth)
     implementation(libs.supabase.postgrest)
     implementation(libs.ktor.client.android)
     implementation(libs.google.signin)
+    implementation(libs.androidx.tracing)
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.mlkit.pose.detection)
+}
+
+val validateReleaseConfig by tasks.registering {
+    group = "verification"
+    description = "Validates production configuration before building a release APK or bundle."
+
+    doLast {
+        val requiredValues = mapOf(
+            "supabase.url / SUPABASE_URL" to configValue("supabase.url", "SUPABASE_URL"),
+            "supabase.key / SUPABASE_KEY" to configValue("supabase.key", "SUPABASE_KEY"),
+            "google.web.client.id / GOOGLE_WEB_CLIENT_ID" to configValue("google.web.client.id", "GOOGLE_WEB_CLIENT_ID"),
+            "api.base.url / API_BASE_URL" to configValue("api.base.url", "API_BASE_URL")
+        )
+
+        val missing = requiredValues.filterValues { it.isBlank() }.keys
+        if (missing.isNotEmpty()) {
+            throw GradleException("Missing release config: ${missing.joinToString()}")
+        }
+
+        val apiBaseUrl = requiredValues.getValue("api.base.url / API_BASE_URL")
+        val localHosts = listOf("localhost", "127.0.0.1", "10.0.2.2", "192.168.")
+        if (!apiBaseUrl.startsWith("https://") || localHosts.any { apiBaseUrl.contains(it) }) {
+            throw GradleException("Release API_BASE_URL must be a public HTTPS URL, got: $apiBaseUrl")
+        }
+    }
+}
+
+tasks.matching { it.name == "assembleRelease" || it.name == "bundleRelease" }.configureEach {
+    dependsOn(validateReleaseConfig)
 }

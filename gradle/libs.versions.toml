@@ -18,6 +18,9 @@ coil = "2.6.0"
 supabase = "3.1.1"
 ktor-client = "3.1.1"
 google-signin = "21.2.0"
+tracing = "1.1.0"
+camerax = "1.4.1"
+mlkitPose = "18.0.0-beta5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -50,6 +53,12 @@ supabase-auth = { group = "io.github.jan-tennert.supabase", name = "auth-kt", ve
 supabase-postgrest = { group = "io.github.jan-tennert.supabase", name = "postgrest-kt", version.ref = "supabase" }
 ktor-client-android = { group = "io.ktor", name = "ktor-client-android", version.ref = "ktor-client" }
 google-signin = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "google-signin" }
+androidx-tracing = { group = "androidx.tracing", name = "tracing", version.ref = "tracing" }
+androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camerax" }
+androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
+androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
+mlkit-pose-detection = { group = "com.google.mlkit", name = "pose-detection", version.ref = "mlkitPose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

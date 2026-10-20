@@ -34,15 +34,27 @@ fun LoginScreen(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            try {
-                val account = task.getResult(ApiException::class.java)
-                val idToken = account.idToken ?: return@rememberLauncherForActivityResult
-                viewModel.signInWithGoogle(idToken, "")
-            } catch (e: ApiException) {
-                // handle error
+        if (result.resultCode != Activity.RESULT_OK) {
+            viewModel.showSignInError("Google sign-in failed before account selection.")
+            return@rememberLauncherForActivityResult
+        }
+
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            val idToken = account.idToken
+            if (idToken == null) {
+                viewModel.showSignInError("Google sign-in returned no ID token.")
+                return@rememberLauncherForActivityResult
             }
+            viewModel.signInWithGoogle(
+                idToken = idToken,
+                rawNonce = "",
+                email = account.email.orEmpty(),
+                displayName = account.displayName.orEmpty()
+            )
+        } catch (e: ApiException) {
+            viewModel.showSignInError("Google sign-in failed: status ${e.statusCode}")
         }
     }
 
@@ -73,7 +85,8 @@ fun LoginScreen(
                 Button(
                     onClick = {
                         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                            .requestIdToken(BuildConfig.GOOGLE_WEB_CLIENT_ID)                            .requestEmail()
+                            .requestIdToken(BuildConfig.GOOGLE_WEB_CLIENT_ID)
+                            .requestEmail()
                             .build()
                         val client = GoogleSignIn.getClient(context, gso)
                         launcher.launch(client.signInIntent)

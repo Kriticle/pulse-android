@@ -1,11 +1,42 @@
 *.iml
-.gradle
-/local.properties
-/.idea
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+*.log
+*.swp
+*.tmp
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+local.properties
 *.keystore
-!debug.keystore
+*.jks
+*.p12
+*.pfx
+*.pem
+*.key
+google-services.json
+service-account*.json
+
+# IDE and operating-system state
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Gradle and Android build output
+.gradle/
+.kotlin/
+build/
+**/build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Local databases, test data, and deployment state
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.tfstate
+*.tfstate.*
+.terraform/
